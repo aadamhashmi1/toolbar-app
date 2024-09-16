@@ -11,25 +11,20 @@ const Toolbar = ({ onBold, onItalic, onUnderline, onStrikethrough, onTextColor, 
     ];
 
     return (
-        <div className="flex gap-2 p-2 bg-gray-100 border-b border-gray-300 fixed top-0 left-0 w-full z-10">
-            <select onChange={(e) => onFontChange(e.target.value)} className="p-1 border border-gray-300 rounded">
+        <div className="fixed top-0 left-0 w-full bg-gray-100 border-b border-gray-300 flex items-center p-4 z-10">
+            <select onChange={(e) => onFontChange(e.target.value)} className="p-1 border border-gray-300 rounded mr-2">
                 {fonts.map((font, index) => (
                     <option key={index} value={font}>{font}</option>
                 ))}
             </select>
-            <button onClick={onBold}><FaBold /></button>
-            <button onClick={onItalic}><FaItalic /></button>
-            <button onClick={onUnderline}><FaUnderline /></button>
-            <button onClick={onStrikethrough}><FaStrikethrough /></button>
-            <button onClick={onTextColor}><FaPalette /></button>
-            <button onClick={onComment}><FaComment /></button>
-            <button onClick={onAlignLeft}><FaAlignLeft /></button>
-            <button onClick={onNumberedList}><FaListOl /></button>
-            <button onClick={onBulletedList}><FaListUl /></button>
-            <button onClick={onIndent}><FaIndent /></button>
-            <button onClick={onEquation}><FaSuperscript /></button>
-            <button onClick={onOptimize}><FaMagic /></button>
-            <button onClick={onRedo}><FaRedo /></button>
+            <button onClick={onBold} className="mr-2"><FaBold /></button>
+            <button onClick={onItalic} className="mr-2"><FaItalic /></button>
+            <button onClick={onTextColor} className="mr-2"><FaPalette /></button>
+            <button onClick={onComment} className="mr-2"><FaComment /></button>
+            <button onClick={onAlignLeft} className="mr-2"><FaAlignLeft /></button>
+            <button onClick={onIndent} className="mr-2"><FaIndent /></button>
+            <button onClick={onEquation} className="mr-2"><FaSuperscript /></button>
+            <button onClick={onRedo} className="mr-2"><FaRedo /></button>
         </div>
     );
 };
