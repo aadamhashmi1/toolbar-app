@@ -57,6 +57,7 @@ const ImageModal = () => {
                 });
                 fabricCanvas.add(fabricImg);
             }
+            
         
             const context = fabricCanvas.getContext('2d');
             context.drawImage(imgElement, 0, 0, imgWidth, imgHeight);
@@ -254,6 +255,7 @@ const ImageModal = () => {
     const handleElementDrag = (e, element) => {
         e.dataTransfer.setData('element', JSON.stringify(element));
     };
+    
 
     const handleDrop = (e) => {
         e.preventDefault();
