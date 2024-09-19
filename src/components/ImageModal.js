@@ -13,7 +13,8 @@ const ImageModal = () => {
     const [canvas, setCanvas] = useState(null);
     const [textObject, setTextObject] = useState(null);
     const [fontIndex, setFontIndex] = useState(0);
-
+    const [undoStack, setUndoStack] = useState([]);
+    const [redoStack, setRedoStack] = useState([]);
     const fonts = useMemo(() => [
         'Arial', 'Verdana', 'Courier New', 'Georgia', 'Times New Roman', 'Comic Sans MS', 'Trebuchet MS', 'Helvetica',
         'Impact', 'Lucida Console', 'Tahoma', 'Palatino', 'Garamond', 'Bookman', 'Arial Black', 'Avant Garde', 'Calibri',
@@ -116,6 +117,19 @@ const ImageModal = () => {
             fabricCanvas.dispose();
         };
     }, [imageUrl, quote, fonts, fontIndex]);
+
+    const handleUndo = () => {
+        if (undoStack.length > 0) {
+            const newRedoStack = [...redoStack, canvas.toJSON()];
+            const newCanvasState = undoStack.pop();
+            setUndoStack([...undoStack]);
+            setRedoStack(newRedoStack);
+            canvas.loadFromJSON(newCanvasState, () => {
+                canvas.renderAll();
+            });
+        }
+    };
+    
 
     const handleFontChange = () => {
         if (textObject) {
@@ -317,7 +331,7 @@ const ImageModal = () => {
                 onIndent={() => {}}
                 onEquation={() => {}}
                 onOptimize={() => {}}
-                onRedo={() => {}}
+                onRedo={handleUndo} // Add this line
                 onFontChange={handleChangeFont}
             />
             <div className="flex w-full h-full mt-4">

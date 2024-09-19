@@ -1,7 +1,7 @@
 import React from 'react';
-import { FaBold, FaItalic, FaUnderline, FaStrikethrough, FaPalette, FaLink, FaComment, FaAlignLeft, FaListOl, FaListUl, FaIndent, FaSuperscript, FaMagic, FaRedo } from 'react-icons/fa';
+import { FaBold, FaItalic,   FaPalette, FaUndo,  FaComment, FaAlignLeft,  FaIndent, FaSuperscript,  FaRedo } from 'react-icons/fa';
 
-const Toolbar = ({ onBold, onItalic, onUnderline, onStrikethrough, onTextColor, onHighlightColor, onLink, onComment, onAlignLeft, onNumberedList, onBulletedList, onIndent, onEquation, onOptimize, onRedo, onFontChange }) => {
+const Toolbar = ({ onBold, onItalic, onTextColor,  onComment, onAlignLeft,  onIndent, onEquation,  onRedo, onFontChange }) => {
     const fonts = [
         'Arial', 'Verdana', 'Courier New', 'Georgia', 'Times New Roman', 'Comic Sans MS', 'Trebuchet MS', 'Helvetica',
         'Impact', 'Lucida Console', 'Tahoma', 'Palatino', 'Garamond', 'Bookman', 'Arial Black', 'Avant Garde', 'Calibri',
@@ -24,8 +24,8 @@ const Toolbar = ({ onBold, onItalic, onUnderline, onStrikethrough, onTextColor, 
             <button onClick={onAlignLeft} className="mr-2"><FaAlignLeft /></button>
             <button onClick={onIndent} className="mr-2"><FaIndent /></button>
             <button onClick={onEquation} className="mr-2"><FaSuperscript /></button>
-            <button onClick={onRedo} className="mr-2"><FaRedo /></button>
-        </div>
+            <button onClick={onRedo} className="mr-2"><FaUndo /></button>
+            </div>
     );
 };
 
