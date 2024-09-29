@@ -12,9 +12,10 @@ const ImageModal = () => {
     const canvasRef = useRef(null);
     const [canvas, setCanvas] = useState(null);
     const [textObject, setTextObject] = useState(null);
-    const [fontIndex, setFontIndex] = useState(0);
+    const [fontIndex] = useState(0);
     const [undoStack, setUndoStack] = useState([]);
     const [redoStack, setRedoStack] = useState([]);
+
     const fonts = useMemo(() => [
         'Arial', 'Verdana', 'Courier New', 'Georgia', 'Times New Roman', 'Comic Sans MS', 'Trebuchet MS', 'Helvetica',
         'Impact', 'Lucida Console', 'Tahoma', 'Palatino', 'Garamond', 'Bookman', 'Arial Black', 'Avant Garde', 'Calibri',
@@ -59,7 +60,6 @@ const ImageModal = () => {
                 fabricCanvas.add(fabricImg);
             }
             
-        
             const context = fabricCanvas.getContext('2d');
             context.drawImage(imgElement, 0, 0, imgWidth, imgHeight);
             const imageData = context.getImageData(0, 0, imgWidth, imgHeight);
@@ -106,6 +106,7 @@ const ImageModal = () => {
             }
             
             setTextObject(text);
+            saveCanvasState(); // Save initial state
         };
 
         imgElement.onerror = (err) => {
@@ -118,40 +119,27 @@ const ImageModal = () => {
         };
     }, [imageUrl, quote, fonts, fontIndex]);
 
-    const handleUndo = () => {
-        if (undoStack.length > 0) {
-            const newRedoStack = [...redoStack, canvas.toJSON()];
-            const newCanvasState = undoStack.pop();
-            setUndoStack([...undoStack]);
-            setRedoStack(newRedoStack);
+    const saveCanvasState = () => {
+        const canvasState = canvas.toJSON();
+        setUndoStack([...undoStack, canvasState]);
+        setRedoStack([]); // Clear the redo stack whenever a new action is performed
+    };
+
+   
+
+    const handleRedo = () => {
+        if (redoStack.length > 0) {
+            const newUndoStack = [...undoStack, canvas.toJSON()];
+            const newCanvasState = redoStack.pop();
+            setUndoStack(newUndoStack);
+            setRedoStack([...redoStack]);
             canvas.loadFromJSON(newCanvasState, () => {
                 canvas.renderAll();
             });
         }
     };
-    
 
-    const handleFontChange = () => {
-        if (textObject) {
-            const newFontIndex = (fontIndex + 1) % fonts.length;
-            textObject.set('fontFamily', fonts[newFontIndex]);
-            setFontIndex(newFontIndex);
-            canvas.renderAll();
-        }
-    };
-
-    const handleSave = () => {
-        if (canvas) {
-            const dataURL = canvas.toDataURL({
-                format: 'png',
-                quality: 1.0,
-            });
-            const link = document.createElement('a');
-            link.href = dataURL;
-            link.download = 'canvas-image.png';
-            link.click();
-        }
-    };
+ 
 
     const handleClose = () => {
         navigate(-1);
@@ -184,6 +172,7 @@ const ImageModal = () => {
             const newColor = getRandomColor();
             textObject.set('fill', newColor);
             canvas.renderAll();
+            saveCanvasState(); // Save state after color change
         }
     };
 
@@ -191,6 +180,7 @@ const ImageModal = () => {
         if (textObject && canvas) {
             textObject.set('fontFamily', font);
             canvas.renderAll();
+            saveCanvasState(); // Save state after font change
         }
     };
 
@@ -199,6 +189,7 @@ const ImageModal = () => {
             const isBold = textObject.fontWeight === 'bold';
             textObject.set('fontWeight', isBold ? 'normal' : 'bold');
             canvas.renderAll();
+            saveCanvasState(); // Save state after bold change
         }
     };
 
@@ -207,105 +198,102 @@ const ImageModal = () => {
             const isItalic = textObject.fontStyle === 'italic';
             textObject.set('fontStyle', isItalic ? 'normal' : 'italic');
             canvas.renderAll();
+            saveCanvasState(); // Save state after italic change
         }
     };
 
+  
     const handleUnderline = () => {
-        if (textObject && canvas) {
-            const isUnderline = textObject.textDecoration === 'underline';
-            textObject.set('textDecoration', isUnderline ? '' : 'underline');
-            canvas.renderAll();
-        }
-    };
+    if (textObject && canvas) {
+        const isUnderline = textObject.textDecoration === 'underline';
+        textObject.set('textDecoration', isUnderline ? '' : 'underline');
+        canvas.renderAll();
+        saveCanvasState(); // Save state after underline change
+    }
+};
 
-    const handleStrikethrough = () => {
-        if (textObject && canvas) {
-            const isStrikethrough = textObject.textDecoration === 'line-through';
-            textObject.set('textDecoration', isStrikethrough ? '' : 'line-through');
-            canvas.renderAll();
-        }
-    };
+const handleStrikethrough = () => {
+    if (textObject && canvas) {
+        const isStrikethrough = textObject.textDecoration === 'line-through';
+        textObject.set('textDecoration', isStrikethrough ? '' : 'line-through');
+        canvas.renderAll();
+        saveCanvasState(); // Save state after strikethrough change
+    }
+};
 
-    const handleAddComment = () => {
-        if (canvas) {
-            const commentText = new fabric.Textbox('New Comment', {
-                left: canvas.width / 2,
-                top: canvas.height / 2,
-                width: canvas.width * 0.5,
-                fontSize: 20,
-                fill: '#000000',
-                originX: 'center',
-                originY: 'center',
-                textAlign: 'center',
-                editable: true,
-                hasControls: true,
-                hasBorders: true,
-                wordWrap: true,
-                padding: 10,
-                cornerSize: 20,
-                fontFamily: fonts[fontIndex]
-            });
+const handleAddComment = () => {
+    if (canvas) {
+        const commentText = new fabric.Textbox('New Comment', {
+            left: canvas.width / 2,
+            top: canvas.height / 2,
+            width: canvas.width * 0.5,
+            fontSize: 20,
+            fill: '#000000',
+            originX: 'center',
+            originY: 'center',
+            textAlign: 'center',
+            editable: true,
+            hasControls: true,
+            hasBorders: true,
+            wordWrap: true,
+            padding: 10,
+            cornerSize: 20,
+            fontFamily: fonts[fontIndex]
+        });
 
-            canvas.add(commentText);
-            canvas.setActiveObject(commentText);
-            canvas.renderAll();
-            
-            if (typeof commentText.bringToFront === 'function') {
-                commentText.bringToFront();
-            }
-            
-            setTextObject(commentText);
-        }
-    };
+        canvas.add(commentText);
+        canvas.setActiveObject(commentText);
+        canvas.renderAll();
+        saveCanvasState(); // Save state after adding comment
+    }
+};
+const handleAlignLeft = () => {
+    if (textObject && canvas) {
+        const isLeftAligned = textObject.textAlign === 'left';
+        textObject.set('textAlign', isLeftAligned ? 'center' : 'left');
+        canvas.renderAll();
+    }
+};
 
-    const handleAlignLeft = () => {
-        if (textObject && canvas) {
-            const isLeftAligned = textObject.textAlign === 'left';
-            textObject.set('textAlign', isLeftAligned ? 'center' : 'left');
-            canvas.renderAll();
-        }
-    };
+const handleElementDrag = (e, element) => {
+    e.dataTransfer.setData('element', JSON.stringify(element));
+};
 
-    const handleElementDrag = (e, element) => {
-        e.dataTransfer.setData('element', JSON.stringify(element));
-    };
-    
 
-    const handleDrop = (e) => {
-        e.preventDefault();
-        const data = e.dataTransfer.getData('element');
-        if (!data) {
-            console.error('No data found in dataTransfer');
-            return;
-        }
-    
-        let element;
-        try {
-            element = JSON.parse(data);
-        } catch (error) {
-            console.error('Error parsing JSON:', error);
-            return;
-        }
-    
-        if (canvas && element) {
-            fabric.Image.fromURL(element.src.medium, (img) => {
-                img.set({
-                    left: canvas.width / 2,
-                    top: canvas.height / 2,
-                    originX: 'center',
-                    originY: 'center',
-                    selectable: true,
-                    hasControls: true,
-                    hasBorders: true,
-                });
-                canvas.add(img);
-                canvas.setActiveObject(img);
-                img.bringToFront();
-                canvas.renderAll();
-            });
-        }
+const handleDrop = (e) => {
+    e.preventDefault();
+    const element = JSON.parse(e.dataTransfer.getData('element'));
+    const imgElement = new Image();
+    imgElement.crossOrigin = 'anonymous';
+    imgElement.src = element.src.medium;
+
+    imgElement.onload = () => {
+        const fabricImg = new fabric.Image(imgElement, {
+            left: canvas.width / 2,
+            top: canvas.height / 2,
+            originX: 'center',
+            originY: 'center',
+            selectable: true,
+            evented: true,
+        });
+
+        canvas.add(fabricImg);
+        canvas.setActiveObject(fabricImg);
+        canvas.renderAll();
+        saveCanvasState(); // Save state after adding image
     };
-    
+};
+
+useEffect(() => {
+    const canvasElement = canvasRef.current;
+    canvasElement.addEventListener('dragover', (e) => e.preventDefault());
+    canvasElement.addEventListener('drop', handleDrop);
+
+    return () => {
+        canvasElement.removeEventListener('dragover', (e) => e.preventDefault());
+        canvasElement.removeEventListener('drop', handleDrop);
+    };
+}, [canvas]);
     
 
     return (
@@ -331,7 +319,7 @@ const ImageModal = () => {
                 onIndent={() => {}}
                 onEquation={() => {}}
                 onOptimize={() => {}}
-                onRedo={handleUndo} // Add this line
+                onRedo={handleRedo} // Add this line
                 onFontChange={handleChangeFont}
             />
             <div className="flex w-full h-full mt-4">

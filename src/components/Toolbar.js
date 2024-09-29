@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaBold, FaItalic,   FaPalette, FaUndo,  FaComment, FaAlignLeft,  FaIndent, FaSuperscript,  FaRedo } from 'react-icons/fa';
+import { FaBold, FaItalic,   FaPalette,   FaComment, FaAlignLeft,  FaIndent, FaSuperscript,  FaRedo } from 'react-icons/fa';
 
 const Toolbar = ({ onBold, onItalic, onTextColor,  onComment, onAlignLeft,  onIndent, onEquation,  onRedo, onFontChange }) => {
     const fonts = [
@@ -24,7 +24,7 @@ const Toolbar = ({ onBold, onItalic, onTextColor,  onComment, onAlignLeft,  onIn
             <button onClick={onAlignLeft} className="mr-2"><FaAlignLeft /></button>
             <button onClick={onIndent} className="mr-2"><FaIndent /></button>
             <button onClick={onEquation} className="mr-2"><FaSuperscript /></button>
-            <button onClick={onRedo} className="mr-2"><FaUndo /></button>
+            <button onClick={onRedo} className="mr-2"><FaRedo /></button>
             </div>
     );
 };
