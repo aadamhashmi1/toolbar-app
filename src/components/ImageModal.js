@@ -37,6 +37,8 @@ const ImageModal = () => {
         imgElement.crossOrigin = 'anonymous';
         imgElement.src = imageUrl;
 
+        
+
         imgElement.onload = () => {
             const fabricImg = new fabric.Image(imgElement, {
                 left: 0,
@@ -100,7 +102,7 @@ const ImageModal = () => {
             fabricCanvas.add(text);
             fabricCanvas.setActiveObject(text);
             fabricCanvas.renderAll();
-            
+
             if (typeof text.bringToFront === 'function') {
                 text.bringToFront();
             }
@@ -125,8 +127,6 @@ const ImageModal = () => {
         setRedoStack([]); // Clear the redo stack whenever a new action is performed
     };
 
-   
-
     const handleRedo = () => {
         if (redoStack.length > 0) {
             const newUndoStack = [...undoStack, canvas.toJSON()];
@@ -138,8 +138,6 @@ const ImageModal = () => {
             });
         }
     };
-
- 
 
     const handleClose = () => {
         navigate(-1);
@@ -158,21 +156,13 @@ const ImageModal = () => {
         }
     };
 
-    const getRandomColor = () => {
-        const letters = '0123456789ABCDEF';
-        let color = '#';
-        for (let i = 0; i < 6; i++) {
-            color += letters[Math.floor(Math.random() * 16)];
-        }
-        return color;
-    };
+    
 
-    const handleChangeColor = () => {
-        if (textObject && canvas) {
-            const newColor = getRandomColor();
-            textObject.set('fill', newColor);
+    const handleChangeColor = (color) => {
+        const activeObject = canvas.getActiveObject();
+        if (activeObject && activeObject.type === 'text') {
+            activeObject.set({ fill: color });
             canvas.renderAll();
-            saveCanvasState(); // Save state after color change
         }
     };
 
@@ -202,108 +192,110 @@ const ImageModal = () => {
         }
     };
 
-  
     const handleUnderline = () => {
-    if (textObject && canvas) {
-        const isUnderline = textObject.textDecoration === 'underline';
-        textObject.set('textDecoration', isUnderline ? '' : 'underline');
-        canvas.renderAll();
-        saveCanvasState(); // Save state after underline change
-    }
-};
-
-const handleStrikethrough = () => {
-    if (textObject && canvas) {
-        const isStrikethrough = textObject.textDecoration === 'line-through';
-        textObject.set('textDecoration', isStrikethrough ? '' : 'line-through');
-        canvas.renderAll();
-        saveCanvasState(); // Save state after strikethrough change
-    }
-};
-
-const handleAddComment = () => {
-    if (canvas) {
-        const commentText = new fabric.Textbox('New Comment', {
-            left: canvas.width / 2,
-            top: canvas.height / 2,
-            width: canvas.width * 0.5,
-            fontSize: 20,
-            fill: '#000000',
-            originX: 'center',
-            originY: 'center',
-            textAlign: 'center',
-            editable: true,
-            hasControls: true,
-            hasBorders: true,
-            wordWrap: true,
-            padding: 10,
-            cornerSize: 20,
-            fontFamily: fonts[fontIndex]
-        });
-
-        canvas.add(commentText);
-        canvas.setActiveObject(commentText);
-        canvas.renderAll();
-        saveCanvasState(); // Save state after adding comment
-    }
-};
-const handleAlignLeft = () => {
-    if (textObject && canvas) {
-        const isLeftAligned = textObject.textAlign === 'left';
-        textObject.set('textAlign', isLeftAligned ? 'center' : 'left');
-        canvas.renderAll();
-    }
-};
-
-const handleElementDrag = (e, element) => {
-    e.dataTransfer.setData('element', JSON.stringify(element));
-};
-
-
-const handleDrop = (e) => {
-    e.preventDefault();
-    const element = JSON.parse(e.dataTransfer.getData('element'));
-    const imgElement = new Image();
-    imgElement.crossOrigin = 'anonymous';
-    imgElement.src = element.src.medium;
-
-    imgElement.onload = () => {
-        const fabricImg = new fabric.Image(imgElement, {
-            left: canvas.width / 2,
-            top: canvas.height / 2,
-            originX: 'center',
-            originY: 'center',
-            selectable: true,
-            evented: true,
-        });
-
-        canvas.add(fabricImg);
-        canvas.setActiveObject(fabricImg);
-        canvas.renderAll();
-        saveCanvasState(); // Save state after adding image
+        if (textObject && canvas) {
+            const isUnderline = textObject.textDecoration === 'underline';
+            textObject.set('textDecoration', isUnderline ? '' : 'underline');
+            canvas.renderAll();
+            saveCanvasState(); // Save state after underline change
+        }
     };
-};
 
-useEffect(() => {
-    const canvasElement = canvasRef.current;
-    canvasElement.addEventListener('dragover', (e) => e.preventDefault());
-    canvasElement.addEventListener('drop', handleDrop);
-
-    return () => {
-        canvasElement.removeEventListener('dragover', (e) => e.preventDefault());
-        canvasElement.removeEventListener('drop', handleDrop);
+    const handleStrikethrough = () => {
+        if (textObject && canvas) {
+            const isStrikethrough = textObject.textDecoration === 'line-through';
+            textObject.set('textDecoration', isStrikethrough ? '' : 'line-through');
+            canvas.renderAll();
+            saveCanvasState(); // Save state after strikethrough change
+        }
     };
-}, [canvas]);
-    
+
+    const handleAddComment = () => {
+        if (canvas) {
+            const commentText = new fabric.Textbox('New Comment', {
+                left: canvas.width / 2,
+                top: canvas.height / 2,
+                width: canvas.width * 0.5,
+                fontSize: 20,
+                fill: '#000000',
+                originX: 'center',
+                originY: 'center',
+                textAlign: 'center',
+                editable: true,
+                hasControls: true,
+                hasBorders: true,
+                wordWrap: true,
+                padding: 10,
+                cornerSize: 20,
+                fontFamily: fonts[fontIndex]
+            });
+
+            canvas.add(commentText);
+            canvas.setActiveObject(commentText);
+            canvas.renderAll();
+            saveCanvasState(); // Save state after adding comment
+        }
+    };
+
+    const handleAlignLeft = () => {
+        if (textObject && canvas) {
+            const isLeftAligned = textObject.textAlign === 'left';
+            textObject.set('textAlign', isLeftAligned ? 'center' : 'left');
+            canvas.renderAll();
+        }
+    };
+
+    const handleElementDrag = (e, element) => {
+        e.dataTransfer.setData('element', JSON.stringify(element));
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        const element = JSON.parse(e.dataTransfer.getData('element'));
+        const imgElement = new Image();
+        imgElement.crossOrigin = 'anonymous';
+        imgElement.src = element.src.medium;
+
+        imgElement.onload = () => {
+            const fabricImg = new fabric.Image(imgElement, {
+                left: canvas.width / 2,
+                top: canvas.height / 2,
+                originX: 'center',
+                originY: 'center',
+                selectable: true,
+                evented: true,
+            });
+
+            canvas.add(fabricImg);
+            canvas.setActiveObject(fabricImg);
+            canvas.renderAll();
+            saveCanvasState(); // Save state after adding image
+        };
+    };
+
+    useEffect(() => {
+        const canvasElement = canvasRef.current;
+        canvasElement.addEventListener('dragover', (e) => e.preventDefault());
+        canvasElement.addEventListener('drop', handleDrop);
+
+        return () => {
+            canvasElement.removeEventListener('dragover', (e) => e.preventDefault());
+            canvasElement.removeEventListener('drop', handleDrop);
+        };
+    }, [canvas]);
 
     return (
-        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-70 flex flex-col items-center justify-center overflow-auto">
-            <button
-                onClick={handleClose}
-                className="absolute top-4 right-4 bg-white border-none px-4 py-2 cursor-pointer z-30 rounded"
-            >
-                Close
-            </button>
+        <div className="fixed top-0 left-0 w-full h-full bg-gray-900 flex">
+            <Sidebar onElementDrag={handleElementDrag} />
+            <div className="flex-1 flex justify-center items-center bg-gray-800">
+                <div
+                    className="canvas-container relative flex justify-center items-center bg-gray-700 border-4 border-gray-600 shadow-lg"
+                    onDrop={handleDrop}
+                    onDragOver={(e) => e.preventDefault()}
+                >
+                    <canvas ref={canvasRef} className="border-2 border-gray-500"></canvas>
+                </div>
+            </div>
             <Toolbar
                 onBold={handleBold}
                 onItalic={handleItalic}
@@ -319,30 +311,25 @@ useEffect(() => {
                 onIndent={() => {}}
                 onEquation={() => {}}
                 onOptimize={() => {}}
-                onRedo={handleRedo} // Add this line
+                onRedo={handleRedo}
                 onFontChange={handleChangeFont}
             />
-            <div className="flex w-full h-full mt-4">
-                <Sidebar onElementDrag={handleElementDrag} />
-                <div
-                    className="canvas-container flex-1 relative flex justify-center items-center"
-                    onDrop={handleDrop}
-                    onDragOver={(e) => e.preventDefault()}
-                >
-                    <canvas ref={canvasRef} className="border-2 border-white"></canvas>
-                </div>
-            </div>
-            <div className="spinner" id="spinner">Loading...</div>
+            <button
+                onClick={handleClose}
+                className="absolute top-4 right-4 bg-red-600 text-white px-4 py-2 cursor-pointer z-30 rounded"
+            >
+                Close
+            </button>
             <div className="absolute bottom-4 flex gap-4">
                 <button
-                    className="bg-white border-none px-4 py-2 cursor-pointer z-30 rounded"
+                    className="bg-blue-600 text-white px-4 py-2 cursor-pointer z-30 rounded"
                     onClick={handleDownload}
                 >
                     Download
                 </button>
             </div>
+            <div className="spinner" id="spinner">Loading...</div>
         </div>
     );
 };
-
 export default ImageModal;

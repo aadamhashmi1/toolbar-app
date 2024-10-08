@@ -28,10 +28,9 @@ const Sidebar = ({ onElementDrag }) => {
     const handleElementDrag = (e, element) => {
         e.dataTransfer.setData('element', JSON.stringify(element));
     };
-    
 
     return (
-        <div className="fixed top-0 left-0 h-full bg-white shadow-lg transform transition-transform duration-300 ease-in-out w-64 mt-16 z-20">
+        <div className="fixed top-0 left-0 h-full bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out w-64 z-20">
             <div className="p-4">
                 <input
                     type="text"
