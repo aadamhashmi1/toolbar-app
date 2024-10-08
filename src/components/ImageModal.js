@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import * as fabric from 'fabric';
 import Toolbar from './Toolbar';
 import Sidebar from './Sidebar';
+import LayerControls from './LayerControls';
 
 const ImageModal = () => {
     const location = useLocation();
@@ -15,6 +16,7 @@ const ImageModal = () => {
     const [fontIndex] = useState(0);
     const [undoStack, setUndoStack] = useState([]);
     const [redoStack, setRedoStack] = useState([]);
+    const [layers, setLayers] = useState([]);
 
     const fonts = useMemo(() => [
         'Arial', 'Verdana', 'Courier New', 'Georgia', 'Times New Roman', 'Comic Sans MS', 'Trebuchet MS', 'Helvetica',
@@ -36,8 +38,6 @@ const ImageModal = () => {
         const imgElement = new Image();
         imgElement.crossOrigin = 'anonymous';
         imgElement.src = imageUrl;
-
-        
 
         imgElement.onload = () => {
             const fabricImg = new fabric.Image(imgElement, {
@@ -156,8 +156,6 @@ const ImageModal = () => {
         }
     };
 
-    
-
     const handleChangeColor = (color) => {
         const activeObject = canvas.getActiveObject();
         if (activeObject && activeObject.type === 'text') {
@@ -270,7 +268,46 @@ const ImageModal = () => {
             canvas.setActiveObject(fabricImg);
             canvas.renderAll();
             saveCanvasState(); // Save state after adding image
+
+            const newLayer = {
+                id: fabricImg.id,
+                object: fabricImg,
+                visible: true,
+                opacity: 1,
+            };
+            addLayer(newLayer);
         };
+    };
+
+    const addLayer = (layer) => {
+        setLayers([...layers, layer]);
+    };
+
+    const removeLayer = (layerId) => {
+        setLayers(layers.filter(layer => layer.id !== layerId));
+    };
+
+    const toggleLayerVisibility = (layerId) => {
+        const updatedLayers = layers.map(layer => {
+            if (layer.id === layerId) {
+                layer.visible = !layer.visible;
+                layer.object.set({ visible: layer.visible });
+            }
+            return layer;
+        });
+        setLayers(updatedLayers);
+        canvas.renderAll();
+    };
+
+    const changeLayerOpacity = (layerId, opacity) => {
+        const updatedLayers = layers.map(layer => {
+            if (layer.id === layerId) {
+                layer.object.set({ opacity });
+            }
+            return layer;
+        });
+        setLayers(updatedLayers);
+        canvas.renderAll();
     };
 
     useEffect(() => {
@@ -314,6 +351,12 @@ const ImageModal = () => {
                 onRedo={handleRedo}
                 onFontChange={handleChangeFont}
             />
+            <LayerControls
+                layers={layers}
+                onToggleVisibility={toggleLayerVisibility}
+                onChangeOpacity={changeLayerOpacity}
+                onRemoveLayer={removeLayer}
+            />
             <button
                 onClick={handleClose}
                 className="absolute top-4 right-4 bg-red-600 text-white px-4 py-2 cursor-pointer z-30 rounded"
@@ -332,4 +375,5 @@ const ImageModal = () => {
         </div>
     );
 };
+
 export default ImageModal;

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import SearchBar from './components/SearchBar';
 import ImageGrid from './components/ImageGrid';
-import NavBar from './components/NavBar'; // Import NavBar
+import NavBar from './components/NavBar'; 
 
 const App = () => {
     const [images, setImages] = useState([]);
